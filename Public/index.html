@@ -1,35 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chatting App</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Modern Chat App</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <h1>Chatting App</h1>
-    <form >
-        <label for="Message">Message :</label>
-        <input type="text" name="Message" id="Message" placeholder="Type your Message">
-        <button type="submit" id="sendBtn">SEnd</button>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+
+  <div class="w-full max-w-md bg-white shadow-lg rounded-xl p-6">
+    <h1 class="text-2xl font-bold text-center text-indigo-600 mb-4">💬 Chat App</h1>
+
+    <!-- Messages Area -->
+    <div id="messages" class="h-72 overflow-y-auto bg-gray-50 border rounded-lg p-3 mb-4 space-y-2 text-gray-800">
+      <!-- Messages will appear here -->
+    </div>
+
+    <!-- Form -->
+    <form class="flex items-center gap-2">
+      <input
+        type="text"
+        id="Message"
+        placeholder="Type your message..."
+        class="flex-grow border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+      />
+      <button
+        type="submit"
+        id="sendBtn"
+        class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition"
+      >
+        Send
+      </button>
     </form>
-    <div id="messages"></div>
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-        const socket = io();
-        const messageInput = document.getElementById("Message");
-        const SendBTN = document.getElementById("sendBtn");
-        const Allmessages = document.getElementById("messages");
-        socket.on("message",(message)=>{
-            const p = document.createElement("p");
-            p.innerText = message;
-            Allmessages.appendChild(p);
-        });
-        SendBTN.addEventListener("click",(e)=>{
-            e.preventDefault();
-            const message = messageInput.value;
-            console.log(message);
-            socket.emit("your-message" , message);
-        });
-      </script>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const messageInput = document.getElementById("Message");
+    const sendBtn = document.getElementById("sendBtn");
+    const messagesDiv = document.getElementById("messages");
+
+    // Render received message (left aligned)
+    socket.on("message", (message) => {
+      const div = document.createElement("div");
+      div.className = "flex justify-start";
+      div.innerHTML = `<div class="bg-gray-200 text-black px-4 py-2 rounded-lg max-w-xs">${message}</div>`;
+      messagesDiv.appendChild(div);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    });
+
+    // Send message (right aligned)
+    sendBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      const message = messageInput.value.trim();
+      if (!message) return;
+
+      // Show sender message immediately
+      const div = document.createElement("div");
+      div.className = "flex justify-end";
+      div.innerHTML = `<div class="bg-indigo-500 text-white px-4 py-2 rounded-lg max-w-xs">${message}</div>`;
+      messagesDiv.appendChild(div);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+      socket.emit("your-message", message);
+      messageInput.value = "";
+    });
+  </script>
+
 </body>
 </html>
